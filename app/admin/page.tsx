@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import EmployeeGrid from '@/components/admin/EmployeeGrid'
 import AnnouncementManager from '@/components/admin/AnnouncementManager'
+import AdhanSoundManager, { type AdhanSoundRow } from '@/components/admin/AdhanSoundManager'
 import { updateCompanySettings } from './actions'
 import type { UserProfile } from '@/lib/supabase/types'
 
@@ -10,13 +11,22 @@ export default async function AdminPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [employeesRes, settingsRes] = await Promise.all([
+  const [employeesRes, settingsRes, adhanRes] = await Promise.all([
     supabase.from('user_profiles').select('*').order('full_name'),
     supabase.from('site_settings').select('*').eq('id', 'global_config').maybeSingle(),
+    supabase.from('adhan_sounds').select('*').order('uploaded_at', { ascending: false }),
   ])
 
   const employees = (employeesRes.data ?? []) as UserProfile[]
   const settings = settingsRes.data
+
+  const adhanSounds: AdhanSoundRow[] = (adhanRes.data ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    is_default: s.is_default,
+    uploaded_at: s.uploaded_at,
+    url: supabase.storage.from('adhan-sounds').getPublicUrl(s.storage_path).data.publicUrl,
+  }))
 
   return (
     <div className="flex flex-col gap-8">
@@ -27,6 +37,9 @@ export default async function AdminPage() {
 
       {/* Announcement */}
       <AnnouncementManager settings={settings} />
+
+      {/* Adhan sounds */}
+      <AdhanSoundManager sounds={adhanSounds} />
 
       {/* Company settings */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6">

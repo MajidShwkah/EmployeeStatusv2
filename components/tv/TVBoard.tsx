@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { User } from 'lucide-react'
+import { User, Volume2, VolumeX } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
   getNextPrayer,
@@ -45,9 +45,10 @@ interface Props {
   initialOpc: OpcData | null
   initialSettings: SiteSettings | null
   initialPrayerTimes: PrayerTimings | null
+  initialAdhanUrl: string | null
 }
 
-export default function TVBoard({ initialEmployees, initialOpc, initialSettings, initialPrayerTimes }: Props) {
+export default function TVBoard({ initialEmployees, initialOpc, initialSettings, initialPrayerTimes, initialAdhanUrl }: Props) {
   const [employees, setEmployees] = useState<AiSafeUserProfile[]>(initialEmployees)
   const [settings, setSettings]   = useState<SiteSettings | null>(initialSettings)
   const [prayerTimes]              = useState<PrayerTimings | null>(initialPrayerTimes)
@@ -66,6 +67,10 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
   const adhanAudioRef  = useRef<HTMLAudioElement | null>(null)
   const chimeAudioRef  = useRef<HTMLAudioElement | null>(null)
   const channelUid     = useRef(0)
+  const adhanUrlRef    = useRef<string | null>(initialAdhanUrl)
+  const [adhanUrl, setAdhanUrl] = useState<string | null>(initialAdhanUrl)
+  const [audioUnlocked, setAudioUnlocked] = useState(false)
+  useEffect(() => { adhanUrlRef.current = adhanUrl }, [adhanUrl])
 
   useEffect(() => {
     initialEmployees.forEach((e) => {
@@ -96,9 +101,26 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
 
   const playAdhan = useCallback(() => {
     if (typeof window === 'undefined') return
-    if (!adhanAudioRef.current) adhanAudioRef.current = new Audio('/audio/adhan.mp3')
+    const url = adhanUrlRef.current
+    if (!url) return
+    if (!adhanAudioRef.current || adhanAudioRef.current.src !== url) {
+      adhanAudioRef.current = new Audio(url)
+    }
+    adhanAudioRef.current.currentTime = 0
     adhanAudioRef.current.play().catch(() => {})
   }, [])
+
+  const unlockAudio = useCallback(() => {
+    if (audioUnlocked) return
+    if (!chimeAudioRef.current) chimeAudioRef.current = new Audio('/audio/notification.mp3')
+    const a = chimeAudioRef.current
+    a.muted = true
+    a.play().then(() => { a.pause(); a.muted = false; a.currentTime = 0; setAudioUnlocked(true) })
+     .catch(() => { a.muted = false; setAudioUnlocked(true) })
+    if (adhanUrlRef.current && !adhanAudioRef.current) {
+      adhanAudioRef.current = new Audio(adhanUrlRef.current)
+    }
+  }, [audioUnlocked])
 
   const subscribeToRealtime = useCallback(() => {
     const uid      = ++channelUid.current
@@ -171,10 +193,31 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
       })
       .subscribe()
 
+    const adhanCh = supabase
+      .channel(`tv-adhan-${uid}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'adhan_sounds' }, async () => {
+        const { data } = await supabase
+          .from('adhan_sounds')
+          .select('storage_path')
+          .eq('is_default', true)
+          .maybeSingle()
+        const newPath = data?.storage_path ?? null
+        const newUrl = newPath
+          ? supabase.storage.from('adhan-sounds').getPublicUrl(newPath).data.publicUrl
+          : null
+        setAdhanUrl(newUrl)
+        if (adhanAudioRef.current && newUrl !== adhanAudioRef.current.src) {
+          adhanAudioRef.current.pause()
+          adhanAudioRef.current = newUrl ? new Audio(newUrl) : null
+        }
+      })
+      .subscribe()
+
     return () => {
       supabase.removeChannel(profileCh)
       supabase.removeChannel(settingsCh)
       supabase.removeChannel(krCh)
+      supabase.removeChannel(adhanCh)
     }
   }, [addToast, playChime])
 
@@ -311,6 +354,30 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
       )}
 
       <NotificationToast toasts={toasts} onDismiss={dismissToast} />
+
+      {/* Audio unlock — required by browser autoplay policy */}
+      {!audioUnlocked && (
+        <button
+          onClick={unlockAudio}
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-2xl text-white font-semibold shadow-2xl cursor-pointer hover:opacity-90 transition-opacity"
+          style={{
+            background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+            boxShadow: '0 10px 40px rgba(249,115,22,0.45)',
+          }}
+        >
+          <VolumeX className="w-5 h-5" />
+          <span>Click to enable adhan sound</span>
+        </button>
+      )}
+      {audioUnlocked && !adhanUrl && (
+        <div
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 rounded-xl text-amber-900 text-sm font-medium"
+          style={{ background: 'rgba(254,243,199,0.95)', border: '1px solid rgba(245,158,11,0.4)' }}
+        >
+          <Volume2 className="w-4 h-4" />
+          No adhan sound configured
+        </div>
+      )}
     </div>
   )
 }

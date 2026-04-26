@@ -13,6 +13,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      adhan_sounds: {
+        Row: {
+          id: string
+          name: string
+          storage_path: string
+          is_default: boolean
+          uploaded_by: string | null
+          uploaded_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          storage_path: string
+          is_default?: boolean
+          uploaded_by?: string | null
+          uploaded_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          storage_path?: string
+          is_default?: boolean
+          uploaded_by?: string | null
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
       key_results: {
         Row: {
           created_at: string | null
@@ -262,6 +289,7 @@ export type KeyResult = Database['public']['Tables']['key_results']['Row']
 export type ObjectiveOwner = Database['public']['Tables']['objective_owners']['Row']
 export type ObjectiveCustodian = Database['public']['Tables']['objective_custodians']['Row']
 export type AiSafeUserProfile = Database['public']['Views']['ai_safe_user_profiles']['Row']
+export type AdhanSound = Database['public']['Tables']['adhan_sounds']['Row']
 
 // Semantic aliases (narrowed from string | null for component use)
 export type Role = 'admin' | 'employee' | 'coordinator'

@@ -10,7 +10,7 @@ export const revalidate = 0
 export default async function TVPage() {
   const supabase = await createClient()
 
-  const [employeesRes, cycleRes, settingsRes, prayerRes] = await Promise.allSettled([
+  const [employeesRes, cycleRes, settingsRes, prayerRes, adhanRes] = await Promise.allSettled([
     supabase
       .from('ai_safe_user_profiles')
       .select('*')
@@ -26,6 +26,11 @@ export default async function TVPage() {
       .eq('id', 'global_config')
       .maybeSingle(),
     fetchPrayerTimes(),
+    supabase
+      .from('adhan_sounds')
+      .select('storage_path')
+      .eq('is_default', true)
+      .maybeSingle(),
   ])
 
   const employees =
@@ -36,6 +41,11 @@ export default async function TVPage() {
     settingsRes.status === 'fulfilled' ? settingsRes.value.data : null
   const prayerTimes =
     prayerRes.status === 'fulfilled' ? prayerRes.value : null
+  const defaultAdhanPath =
+    adhanRes.status === 'fulfilled' ? adhanRes.value.data?.storage_path ?? null : null
+  const initialAdhanUrl = defaultAdhanPath
+    ? supabase.storage.from('adhan-sounds').getPublicUrl(defaultAdhanPath).data.publicUrl
+    : null
 
   let opcData: OpcData | null = null
 
@@ -109,6 +119,7 @@ export default async function TVPage() {
       initialOpc={opcData}
       initialSettings={settings as SiteSettings | null}
       initialPrayerTimes={prayerTimes}
+      initialAdhanUrl={initialAdhanUrl}
     />
   )
 }
