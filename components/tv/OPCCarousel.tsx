@@ -76,27 +76,27 @@ export default function OPCCarousel({ opc, objIdx, krIdx }: Props) {
       className="w-full shrink-0"
       style={{ background: '#ffffff', borderTop: '1px solid #e2e8f0', boxShadow: '0 -2px 8px rgba(0,0,0,0.04)' }}
     >
-      <div className="flex items-center px-8 py-4 gap-0" style={{ minHeight: '100px' }}>
+      <div className="flex items-center px-8 py-5 gap-0" style={{ minHeight: '140px' }}>
 
         {/* OPC badge + dates */}
-        <div className="shrink-0 flex flex-col gap-2 pr-8" style={{ minWidth: '200px' }}>
+        <div className="shrink-0 flex flex-col gap-2.5 pr-8" style={{ minWidth: '240px' }}>
           <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full font-bold uppercase tracking-widest self-start"
-            style={{ background: '#F97316', color: '#fff', fontSize: '0.9rem' }}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full font-bold uppercase tracking-widest self-start"
+            style={{ background: '#F97316', color: '#fff', fontSize: '1.1rem' }}
           >
             OPC #{opc.cycleNumber}
           </div>
 
-          <div className="flex items-center gap-1 text-sm" style={{ color: '#64748b' }}>
-            <Calendar className="w-3.5 h-3.5 shrink-0" />
+          <div className="flex items-center gap-1.5 text-base font-medium" style={{ color: '#64748b' }}>
+            <Calendar className="w-4 h-4 shrink-0" />
             <span>{opc.startDate}</span>
-            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+            <ChevronRight className="w-4 h-4 shrink-0" />
             <span>{opc.endDate}</span>
           </div>
 
           <div
-            className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-bold self-start"
-            style={{ background: urgency.bg, color: urgency.color, border: `1px solid ${urgency.border}` }}
+            className="inline-flex items-center px-4 py-1 rounded-full text-base font-bold self-start"
+            style={{ background: urgency.bg, color: urgency.color, border: `1.5px solid ${urgency.border}` }}
           >
             {left === 0 ? 'Ends today' : `${left} days left`}
           </div>
@@ -107,28 +107,28 @@ export default function OPCCarousel({ opc, objIdx, krIdx }: Props) {
 
         {/* Objective + KR */}
         <div className="flex-1 min-w-0 px-8">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: '#94a3b8' }}>
+          <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#94a3b8' }}>
             Objective {(objIdx % opc.objectives.length) + 1} of {opc.objectives.length}
           </p>
-          <p className="font-bold leading-snug truncate" style={{ fontSize: '1.5rem', color: '#0f172a' }}>
+          <p className="font-bold leading-snug truncate" style={{ fontSize: '2rem', color: '#0f172a' }}>
             {obj.title}
           </p>
 
           {kr && (
-            <div className="flex items-center gap-6 mt-2.5">
+            <div className="flex items-center gap-6 mt-3">
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>
+                <p className="text-sm font-semibold uppercase tracking-widest mb-1.5" style={{ color: '#94a3b8' }}>
                   Key Result Progress
                 </p>
-                <p className="text-lg" style={{ color: '#334155' }}>
+                <p className="text-2xl font-medium" style={{ color: '#334155' }}>
                   {kr.description}
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 shrink-0">
+              <div className="flex items-center gap-5 shrink-0">
                 <div
                   className="rounded-full overflow-hidden"
-                  style={{ width: 180, height: 12, background: '#e2e8f0' }}
+                  style={{ width: 260, height: 18, background: '#e2e8f0' }}
                 >
                   <div
                     className="h-full rounded-full transition-all duration-700"
@@ -137,7 +137,7 @@ export default function OPCCarousel({ opc, objIdx, krIdx }: Props) {
                 </div>
                 <span
                   className="font-black tabular-nums"
-                  style={{ fontSize: '2.2rem', color: krColor(kr.progress), minWidth: '76px', textAlign: 'right', lineHeight: 1 }}
+                  style={{ fontSize: '3rem', color: krColor(kr.progress), minWidth: '96px', textAlign: 'right', lineHeight: 1 }}
                 >
                   {kr.progress}%
                 </span>
@@ -150,15 +150,15 @@ export default function OPCCarousel({ opc, objIdx, krIdx }: Props) {
         <div className="shrink-0 self-stretch my-2" style={{ width: 1, background: '#e2e8f0' }} />
 
         {/* People */}
-        <div className="shrink-0 flex flex-col gap-3 pl-8" style={{ minWidth: '220px' }}>
+        <div className="shrink-0 flex flex-col gap-4 pl-8" style={{ minWidth: '260px' }}>
           {obj.owners.length > 0 && (
             <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold uppercase tracking-wider shrink-0" style={{ color: '#94a3b8', minWidth: '64px' }}>
+              <span className="text-sm font-semibold uppercase tracking-wider shrink-0" style={{ color: '#94a3b8', minWidth: '76px' }}>
                 Owner
               </span>
-              <div className="flex items-center gap-1.5">
-                {obj.owners.slice(0, 3).map((o) => <Avatar key={o.id} name={o.full_name} url={o.avatar_url} size={32} />)}
-                <span className="text-slate-700 text-base font-semibold ml-1.5 truncate max-w-[110px]">
+              <div className="flex items-center gap-2">
+                {obj.owners.slice(0, 3).map((o) => <Avatar key={o.id} name={o.full_name} url={o.avatar_url} size={40} />)}
+                <span className="text-slate-700 text-lg font-semibold ml-2 truncate max-w-[140px]">
                   {obj.owners[0].full_name}
                   {obj.owners.length > 1 ? ` +${obj.owners.length - 1}` : ''}
                 </span>
@@ -168,12 +168,12 @@ export default function OPCCarousel({ opc, objIdx, krIdx }: Props) {
 
           {obj.custodians.length > 0 && (
             <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold uppercase tracking-wider shrink-0" style={{ color: '#94a3b8', minWidth: '64px' }}>
+              <span className="text-sm font-semibold uppercase tracking-wider shrink-0" style={{ color: '#94a3b8', minWidth: '76px' }}>
                 Custodian
               </span>
-              <div className="flex items-center gap-1.5">
-                {obj.custodians.slice(0, 3).map((c) => <Avatar key={c.id} name={c.full_name} url={c.avatar_url} size={32} />)}
-                <span className="text-slate-700 text-base font-semibold ml-1.5 truncate max-w-[110px]">
+              <div className="flex items-center gap-2">
+                {obj.custodians.slice(0, 3).map((c) => <Avatar key={c.id} name={c.full_name} url={c.avatar_url} size={40} />)}
+                <span className="text-slate-700 text-lg font-semibold ml-2 truncate max-w-[140px]">
                   {obj.custodians[0].full_name}
                   {obj.custodians.length > 1 ? ` +${obj.custodians.length - 1}` : ''}
                 </span>

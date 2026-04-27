@@ -57,9 +57,9 @@ const STALE = {
 }
 
 const SIZE = {
-  lg: { pad: 'p-5', av: 76, init: 'text-3xl', name: 'text-xl',   badge: 'text-sm',  detail: 'text-xs', dot: 11 },
-  md: { pad: 'p-4', av: 60, init: 'text-2xl', name: 'text-lg',   badge: 'text-sm',  detail: 'text-xs', dot: 10 },
-  sm: { pad: 'p-3', av: 48, init: 'text-xl',  name: 'text-base', badge: 'text-xs',  detail: 'text-xs', dot: 8  },
+  lg: { pad: 'p-6',   av: 120, init: 'text-5xl', name: 'text-3xl', badge: 'text-xl',  detail: 'text-base', dot: 16 },
+  md: { pad: 'p-5',   av: 96,  init: 'text-4xl', name: 'text-2xl', badge: 'text-lg',  detail: 'text-sm',   dot: 13 },
+  sm: { pad: 'p-4',   av: 72,  init: 'text-3xl', name: 'text-xl',  badge: 'text-base',detail: 'text-sm',   dot: 11 },
 }
 
 export default function EmployeeCard({ employee, size = 'md' }: Props) {

@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import { User, Volume2, VolumeX } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -27,17 +26,18 @@ function isAnnouncementActive(s: SiteSettings | null): boolean {
 }
 
 function getCardSize(n: number): 'lg' | 'md' | 'sm' {
-  if (n <= 8)  return 'lg'
-  if (n <= 16) return 'md'
+  if (n <= 6)  return 'lg'
+  if (n <= 12) return 'md'
   return 'sm'
 }
 
 function getGridCols(n: number): string {
+  if (n <= 4)  return 'grid-cols-2'
   if (n <= 6)  return 'grid-cols-3'
-  if (n <= 8)  return 'grid-cols-4'
+  if (n <= 9)  return 'grid-cols-3'
   if (n <= 12) return 'grid-cols-4'
-  if (n <= 18) return 'grid-cols-6'
-  return 'grid-cols-6'
+  if (n <= 16) return 'grid-cols-4'
+  return 'grid-cols-5'
 }
 
 interface Props {
@@ -286,19 +286,12 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
       >
         {/* Logo */}
         <div className="flex-1 flex items-center">
-          {settings?.logo_url ? (
-            <Image src={settings.logo_url} alt="Logo" width={180} height={64} className="h-16 w-auto object-contain" />
-          ) : (
-            <div className="flex items-center gap-3">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #0B1E3D, #1e3a8a)' }}
-              >
-                <span className="text-white font-black text-2xl">{(settings?.company_name ?? 'R')[0]}</span>
-              </div>
-              <span className="text-3xl font-bold" style={{ color: '#0B1E3D' }}>{settings?.company_name ?? 'Rime'}</span>
-            </div>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://assets.storydoc.com/118a0181eecb9acac25c9f090b9d7979/b78f45fa-22ba-475b-8e4d-4aa9b2e7037c.webp?b=U3D%252C4X%7Eqxu_3t7RjRjj%255B00%253Fb%253Fb4nM_%2525MxuRj"
+            alt={settings?.company_name ?? 'Company Logo'}
+            style={{ height: '72px', width: 'auto', objectFit: 'contain' }}
+          />
         </div>
 
         {/* Center: Clock + Prayer */}
@@ -340,7 +333,7 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
             No employees yet
           </div>
         ) : (
-          <div className={`grid ${gridCols} gap-3 h-full content-start`}>
+          <div className={`grid ${gridCols} gap-4 h-full content-start`}>
             {employees.map((emp) => (
               <EmployeeCard key={emp.id ?? emp.full_name} employee={emp} size={cardSize} />
             ))}

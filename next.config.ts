@@ -4,6 +4,11 @@ const SUPABASE_HOSTNAME = 'dmmmwudmypwcchkxchlg.supabase.co'
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
+  },
   images: {
     remotePatterns: [
       {
@@ -14,6 +19,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.storydoc.com',
       },
     ],
   },
@@ -28,7 +37,7 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
-              `img-src 'self' data: blob: https://${SUPABASE_HOSTNAME} https://lh3.googleusercontent.com`,
+              `img-src 'self' data: blob: https://${SUPABASE_HOSTNAME} https://lh3.googleusercontent.com https://assets.storydoc.com`,
               `media-src 'self' https://${SUPABASE_HOSTNAME}`,
               `connect-src 'self' https://${SUPABASE_HOSTNAME} wss://${SUPABASE_HOSTNAME} https://api.aladhan.com https://accounts.google.com`,
               "font-src 'self' https://fonts.gstatic.com",

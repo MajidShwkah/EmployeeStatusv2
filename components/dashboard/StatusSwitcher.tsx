@@ -113,7 +113,7 @@ export default function StatusSwitcher({ currentStatus, busyUntil }: Props) {
             <button
               key={opt.status}
               onClick={() => handleClick(opt.status)}
-              disabled={loading || status === opt.status}
+              disabled={loading}
               className={`flex flex-col items-center gap-2 px-4 py-4 rounded-xl border-2 font-medium transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
                 status === opt.status
                   ? `${opt.btn} ring-2 ring-offset-2 ring-slate-400 scale-[1.02]`
