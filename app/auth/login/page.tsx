@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 
 interface Props {
   searchParams: Promise<{ error?: string; next?: string }>
@@ -39,7 +40,11 @@ export default async function LoginPage({ searchParams }: Props) {
           action={async () => {
             'use server'
             const supabase = await createClient()
-            const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`
+            const headersList = await headers()
+            const host = headersList.get('host') ?? 'localhost:3000'
+            const proto = headersList.get('x-forwarded-proto') ?? 'http'
+            const baseUrl = `${proto}://${host}`
+            const redirectTo = `${baseUrl}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`
             const { data } = await supabase.auth.signInWithOAuth({
               provider: 'google',
               options: {
