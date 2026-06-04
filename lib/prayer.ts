@@ -42,7 +42,7 @@ export function getNextPrayer(
 
   for (const name of PRAYER_NAMES) {
     const [h, m] = timings[name].split(':').map(Number)
-    if (h * 60 + m > currentMinutes) {
+    if (h * 60 + m >= currentMinutes) {
       return { name, time: timings[name], isTomorrow: false }
     }
   }

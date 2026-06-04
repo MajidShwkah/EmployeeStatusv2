@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { User, Volume2, VolumeX } from 'lucide-react'
+import { User, Volume2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
   getNextPrayer,
@@ -63,9 +63,10 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
   useEffect(() => { opcRef.current = opc }, [opc])
 
   const prevStatusRef  = useRef<Map<string, string>>(new Map())
-  const adhanPlayedRef = useRef('')
-  const adhanAudioRef  = useRef<HTMLAudioElement | null>(null)
-  const chimeAudioRef  = useRef<HTMLAudioElement | null>(null)
+  const adhanPlayedRef   = useRef('')
+  const adhanPendingRef  = useRef(false)
+  const adhanAudioRef    = useRef<HTMLAudioElement | null>(null)
+  const chimeAudioRef    = useRef<HTMLAudioElement | null>(null)
   const channelUid     = useRef(0)
   const adhanUrlRef    = useRef<string | null>(initialAdhanUrl)
   const [adhanUrl, setAdhanUrl] = useState<string | null>(initialAdhanUrl)
@@ -107,7 +108,7 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
       adhanAudioRef.current = new Audio(url)
     }
     adhanAudioRef.current.currentTime = 0
-    adhanAudioRef.current.play().catch(() => {})
+    adhanAudioRef.current.play().catch(() => { adhanPendingRef.current = true })
   }, [])
 
   const unlockAudio = useCallback(() => {
@@ -115,12 +116,14 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
     if (!chimeAudioRef.current) chimeAudioRef.current = new Audio('/audio/notification.mp3')
     const a = chimeAudioRef.current
     a.muted = true
-    a.play().then(() => { a.pause(); a.muted = false; a.currentTime = 0; setAudioUnlocked(true) })
-     .catch(() => { a.muted = false; setAudioUnlocked(true) })
+    a.play().then(() => {
+      a.pause(); a.muted = false; a.currentTime = 0; setAudioUnlocked(true)
+      if (adhanPendingRef.current) { adhanPendingRef.current = false; playAdhan() }
+    }).catch(() => { a.muted = false; setAudioUnlocked(true) })
     if (adhanUrlRef.current && !adhanAudioRef.current) {
       adhanAudioRef.current = new Audio(adhanUrlRef.current)
     }
-  }, [audioUnlocked])
+  }, [audioUnlocked, playAdhan])
 
   const subscribeToRealtime = useCallback(() => {
     const uid      = ++channelUid.current
@@ -225,6 +228,16 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
     const cleanup = subscribeToRealtime()
     return cleanup
   }, [subscribeToRealtime])
+
+  useEffect(() => {
+    const handler = () => unlockAudio()
+    document.addEventListener('click', handler, { once: true })
+    document.addEventListener('touchstart', handler, { once: true })
+    return () => {
+      document.removeEventListener('click', handler)
+      document.removeEventListener('touchstart', handler)
+    }
+  }, [unlockAudio])
 
   useEffect(() => {
     if (!prayerTimes) return
@@ -348,20 +361,6 @@ export default function TVBoard({ initialEmployees, initialOpc, initialSettings,
 
       <NotificationToast toasts={toasts} onDismiss={dismissToast} />
 
-      {/* Audio unlock — required by browser autoplay policy */}
-      {!audioUnlocked && (
-        <button
-          onClick={unlockAudio}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-2xl text-white font-semibold shadow-2xl cursor-pointer hover:opacity-90 transition-opacity"
-          style={{
-            background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-            boxShadow: '0 10px 40px rgba(249,115,22,0.45)',
-          }}
-        >
-          <VolumeX className="w-5 h-5" />
-          <span>Click to enable adhan sound</span>
-        </button>
-      )}
       {audioUnlocked && !adhanUrl && (
         <div
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 rounded-xl text-amber-900 text-sm font-medium"
